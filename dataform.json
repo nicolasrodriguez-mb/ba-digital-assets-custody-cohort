@@ -1,0 +1,8 @@
+{
+  "defaultSchema": "digital_assets_dev",
+  "assertionSchema": "digital_assets_dev_assertions",
+  "warehouse": "bigquery",
+  "defaultDatabase": "ba-sandbox-mb",
+  "defaultLocation": "US"
+}
+    

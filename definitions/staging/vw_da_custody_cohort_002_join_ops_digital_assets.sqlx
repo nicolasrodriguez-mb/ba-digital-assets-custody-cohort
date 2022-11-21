@@ -1,0 +1,43 @@
+config {
+  type: "view"
+}
+SELECT
+  op.cadastro_id,
+  op.cadastro_cluster_segmento,
+  op.cadastro_tier_comercial,
+  op.cadastro_tier,
+  op.operacao_ativo,
+  op.operacao_ativo_tipo,
+  da.* EXCEPT(asset_ticker),
+  op.operacao_data,
+  op.operacao_data_hora,
+  DATETIME(
+    EXTRACT(YEAR FROM DATETIME_ADD( operacao_data_hora, INTERVAL ${constants.INTERVAL} ${constants.INTERVAL_PERIOD})),--year 
+    EXTRACT(MONTH FROM DATETIME_ADD( operacao_data_hora, INTERVAL ${constants.INTERVAL} ${constants.INTERVAL_PERIOD})),--month,
+    EXTRACT(DAY FROM DATETIME_ADD( operacao_data_hora, INTERVAL ${constants.INTERVAL} ${constants.INTERVAL_PERIOD})),--day
+    CAST(
+      TRUNC(
+        SAFE_DIVIDE(
+          EXTRACT(
+            ${constants.INTERVAL_PERIOD} FROM 
+            DATETIME_ADD( 
+              operacao_data_hora, 
+              INTERVAL ${constants.INTERVAL} ${constants.INTERVAL_PERIOD}
+            )
+          ), 
+          ${constants.INTERVAL} 
+        )
+      )*${constants.INTERVAL}  AS INT64),--hour
+    0,--minute,
+    0) AS operacao_data_hora_window,
+  op.operacao_tipo,
+  op.volume_ativo
+FROM
+  ${ref("cubo_crm_operacao_desde_2019")}
+  JOIN
+  digital_assets da
+  ON(
+    op.operacao_ativo = da.asset_ticker
+  )
+WHERE
+  op.operacao_data<= filter_date

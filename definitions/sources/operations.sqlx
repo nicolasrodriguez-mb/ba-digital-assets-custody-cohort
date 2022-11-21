@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  database: "bi-quanti-selfservice",
+  schema: "transacoes",
+  name: "cubo_crm_operacao_desde_2019"
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ba-digital-assets-custody-cohort",
+  "dependencies": {
+    "@dataform/core": "2.0.1"
+  }
+}

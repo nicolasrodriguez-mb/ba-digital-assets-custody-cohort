@@ -1,0 +1,21 @@
+config {
+  type: "view"
+}
+
+SELECT
+  * EXCEPT (cadastro_tier,cadastro_cluster_segmento,cadastro_tier_comercial),
+  MIN(min_operacao_data_hora) OVER (p_operacao_ativo) AS launch_datetime,
+  IF(cadastro_id = listing_account_id , "${constants.NAME_EMISOR_INTERNO}", cadastro_tier) AS cadastro_tier,
+  IF(cadastro_id = listing_account_id , "${constants.NAME_EMISOR_INTERNO}", cadastro_cluster_segmento) AS cadastro_cluster_segmento,
+  IF(cadastro_id = listing_account_id , "${constants.NAME_EMISOR_INTERNO}", cadastro_tier_comercial) AS cadastro_tier_comercial,
+  IFNULL(volume_ativo_wallet_in, 0) 
+    + IFNULL(volume_ativo_trading_in, 0)
+    - IFNULL(volume_ativo_wallet_out, 0)
+    - IFNULL(volume_ativo_trading_out,0) AS total_volume_ativo_in_window
+FROM
+  ${ref("vw_da_custody_cohort_003_group_by_client_and_hour_window")}
+WINDOW
+  p_operacao_ativo AS(
+    PARTITION BY
+      operacao_ativo
+  )

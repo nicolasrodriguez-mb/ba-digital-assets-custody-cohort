@@ -1,0 +1,33 @@
+config {
+  type: "view"
+}
+SELECT
+      cadastro_id,
+      operacao_ativo, 
+      operacao_data_hora_window,
+      ANY_VALUE(cadastro_cluster_segmento) AS cadastro_cluster_segmento,
+      ANY_VALUE(cadastro_tier_comercial) AS cadastro_tier_comercial,
+      ANY_VALUE(cadastro_tier) AS cadastro_tier,
+      ANY_VALUE(operacao_ativo_tipo) AS operacao_ativo_tipo,
+      ANY_VALUE(asset_name) AS asset_name,
+      ANY_VALUE(asset_type) AS asset_type,
+      ANY_VALUE(asset_price) AS asset_price,
+      ANY_VALUE(annual_rate) AS annual_rate,
+      ANY_VALUE(offer_type) AS offer_type,
+      ANY_VALUE(listing_account_id) AS listing_account_id,
+      ANY_VALUE(secondary_market_date) AS secondary_market_date,
+      ANY_VALUE(end_primary_market_date) AS end_primary_market_date,
+      ANY_VALUE(due_date) AS due_date,
+      ANY_VALUE(filter_date) AS filter_date,
+      MIN(operacao_data_hora) AS min_operacao_data_hora,
+      MAX(operacao_data_hora) AS max_operacao_data_hora,
+      SUM(IF(operacao_tipo = "${constants.OPERACAO_TIPO_WALLET_IN}", volume_ativo, NULL)) AS volume_ativo_wallet_in,
+      SUM(IF(operacao_tipo = "${constants.OPERACAO_TIPO_WALLET_OUT}", volume_ativo, NULL)) AS volume_ativo_wallet_out,
+      SUM(IF(operacao_tipo = "${constants.OPERACAO_TIPO_TRADING_OUT}", volume_ativo, NULL)) AS volume_ativo_trading_out,
+      SUM(IF(operacao_tipo = "${constants.OPERACAO_TIPO_TRADING_IN}", volume_ativo, NULL)) AS volume_ativo_trading_in
+    FROM
+      ${ref("vw_da_custody_cohort_002_join_ops_digital_assets")}
+    GROUP BY
+      cadastro_id,
+      operacao_ativo,
+      operacao_data_hora_window

@@ -1,0 +1,29 @@
+config {
+  type: "view"
+}
+  SELECT
+    *,
+    LEAD(operacao_data_hora_window) OVER(p_operacao_ativo_cadastro_id_o_window)  AS lead_period,
+    GENERATE_TIMESTAMP_ARRAY(
+      TIMESTAMP(operacao_data_hora_window),
+      TIMESTAMP(
+        IFNULL(
+          DATETIME_SUB(
+            LEAD(operacao_data_hora_window) OVER(p_operacao_ativo_cadastro_id_o_window),
+            INTERVAL 4 HOUR )
+          ,
+          filter_date)
+        ),
+      INTERVAL 4 HOUR)
+    AS next_periods,
+    SUM(total_volume_ativo_in_window) OVER (p_operacao_ativo_cadastro_id_o_window) AS custodia_ativo
+  FROM
+    ${ref("vw_da_custody_cohort_004_total_sum_ativo")}
+  WINDOW
+    p_operacao_ativo_cadastro_id_o_window AS(
+      PARTITION BY
+        operacao_ativo,
+        cadastro_id
+      ORDER BY
+        operacao_data_hora_window
+    )

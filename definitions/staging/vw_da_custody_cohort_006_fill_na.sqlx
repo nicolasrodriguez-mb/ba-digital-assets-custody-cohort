@@ -1,0 +1,32 @@
+config {
+  type: "view"
+}
+  SELECT
+    * EXCEPT(
+      next_periods,
+      next_period,
+      volume_ativo_wallet_in,
+      volume_ativo_wallet_out,
+      volume_ativo_trading_out,
+      volume_ativo_trading_in,
+      min_operacao_data_hora,
+      max_operacao_data_hora,
+      operacao_data_hora_window,
+      total_volume_ativo_in_window
+      ),
+    DATETIME_DIFF(DATETIME(next_period) , launch_datetime, HOUR) AS hours_live,
+    DATETIME_DIFF(DATETIME(next_period) , launch_datetime, DAY) AS days_live,
+    DATETIME_DIFF(DATETIME(next_period) , launch_datetime, WEEK) AS weeks_live,
+    DATETIME_DIFF(DATETIME(next_period) , launch_datetime, MONTH) AS weeks_live,
+    DATETIME(next_period) AS operacao_data_hora_window,
+    IF(DATETIME(next_period) = operacao_data_hora_window, volume_ativo_wallet_in, NULL) AS volume_ativo_wallet_in,
+    IF(DATETIME(next_period) = operacao_data_hora_window, volume_ativo_wallet_out, NULL) AS volume_ativo_wallet_out,
+    IF(DATETIME(next_period) = operacao_data_hora_window, volume_ativo_trading_out, NULL) AS volume_ativo_trading_out,
+    IF(DATETIME(next_period) = operacao_data_hora_window, volume_ativo_trading_in, NULL) AS volume_ativo_trading_in,
+    IF(DATETIME(next_period) = operacao_data_hora_window, total_volume_ativo_in_window, NULL) AS total_volume_ativo_in_window,
+    IF(DATETIME(next_period) = operacao_data_hora_window, min_operacao_data_hora, NULL) AS min_operacao_data_hora,
+    IF(DATETIME(next_period) = operacao_data_hora_window, max_operacao_data_hora, NULL) AS max_operacao_data_hora
+  FROM
+    calculate_next_periods
+    CROSS JOIN 
+    UNNEST(calculate_next_periods.next_periods) next_period

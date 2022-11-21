@@ -1,0 +1,23 @@
+config {
+  type: "view"
+}
+SELECT
+  asset_ticker,
+  asset_name,
+  asset_type,
+  asset_price,
+  annual_rate,
+  offer_type,
+  listing_account_id,
+  secondary_market_date,
+  due_date,
+  COALESCE(secondary_market_date,due_date) AS end_primary_market_date,
+  IF(
+    COALESCE(
+      secondary_market_date,due_date,
+      CURRENT_DATETIME("${constants.SAO_PAULO_TIMEZONE}")>= CURRENT_DATETIME("${constants.SAO_PAULO_TIMEZONE}") ,
+    CURRENT_DATETIME("${constants.SAO_PAULO_TIMEZONE}"),
+    COALESCE(secondary_market_date,due_date,CURRENT_DATETIME("${constants.SAO_PAULO_TIMEZONE}"))
+    ) AS filter_date
+FROM
+  ${ref("vw_mbda_sheets_digital_assets")}
